@@ -1,0 +1,13 @@
+---
+title: Dashboard code
+---
+
+Here's the code for creating the dashboard:
+
+````{.markdown filename="dashboard.qmd"}
+```{r}
+#| echo: false
+#| output: asis
+writeLines(readLines("dashboard.qmd"))
+```
+````

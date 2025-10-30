@@ -1,0 +1,218 @@
+---
+title: Extension
+format: 
+  live-html:
+    code-tools: true
+    include-in-header: 
+      - text: |
+          <style>
+          .cell-output-webr svg {
+              width: 100%;
+              height: auto;
+          }
+          </style>
+toc: true
+engine: knitr
+webr:
+  packages:
+    - dplyr
+    - ggplot2
+    - tidyr
+    - svglite
+---
+
+{{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
+
+Hopefully you did something neat!
+
+There are *so many* things you can do with Quarto websites and interactivity! See [my whole workshop on Quarto websites](https://andrewheiss.github.io/quarto-websites_2025-10/) for a ton of different examples.
+
+For fun, here are two super extra fancy ways to do more interactive stuff with Quarto.
+
+Use the "Code" button up at the top of this page to see the full `.qmd` for this page.
+
+## OJS and Observable Plot
+
+Observable JS is a Javascript-based way to analyze and visualize data. Because it's Javascript, it runs in your browser and updates live. [Quarto supports OJS natively](https://quarto.org/docs/interactive/ojs/), and you can even make R (or Python) chunks feed into OJS chunks.
+
+For instance, this is R code:
+
+```{r}
+#| label: load-libraries-data
+#| warning: false
+#| message: false
+
+library(tidyverse)
+
+penguins <- datasets::penguins |> 
+  drop_na(sex)
+
+# Make the penguins data available to Observable JS
+ojs_define(penguins = penguins)
+```
+
+This is NOT R code! This is [Observable JS](https://quarto.org/docs/interactive/ojs/) code!
+
+```{ojs}
+//| code-fold: true
+
+// Make a checkbox for the species
+viewof species = Inputs.checkbox(
+  ["Adelie", "Chinstrap", "Gentoo"], 
+  { value: ["Adelie", "Gentoo"], 
+    label: "Species:"
+  }
+)
+
+// Rotate the data so that it works with OJS
+penguins_js = transpose(penguins)
+
+// Filter the data based on the selected species
+penguins_filtered = penguins_js.filter(d => species.includes(d.species))
+
+// Plot this thing
+Plot.plot({
+  color: {
+    domain: ["Adelie", "Chinstrap", "Gentoo"],
+    range: ["#FF8C00", "#A020F0", "#008B8B"]
+  },
+  symbol: {
+    domain: ["Adelie", "Chinstrap", "Gentoo"],
+    range: ["circle", "triangle", "square"]
+  },
+  marks: [
+    Plot.dot(penguins_filtered, {
+        x: "bill_dep", y: "bill_len", fill: "species", symbol: "species", r: 6,
+        tip: true
+      }
+    )
+  ]}
+)
+```
+
+## Quarto Live
+
+The [Quarto Live](https://r-wasm.github.io/quarto-live/) extension lets you run R chunks directly in your browser. This is how the [R Primers](https://r-primers.andrewheiss.com/) work (remember those from the beginning of the semester?!)
+
+One super neat thing about Quarto Live is that you can use OJS inputs to [feed data into live R chunks](https://r-wasm.github.io/quarto-live/interactive/reactivity.html).
+
+Here's OJS code for creating the interactive inputs:
+
+```{ojs}
+//| code-fold: true
+numeric_vars = ["bill_len", "bill_dep", "flipper_len", "body_mass"]
+categorical_vars = ["species", "island", "sex"]
+
+viewof species_filter = Inputs.checkbox(
+  ["Adelie", "Chinstrap", "Gentoo"],
+  {label: "Species to include", value: ["Adelie", "Chinstrap", "Gentoo"]}
+)
+
+viewof x_var = Inputs.select(numeric_vars, {
+  label: "X Variable",
+  value: "bill_len"
+})
+
+viewof y_var = Inputs.select(numeric_vars, {
+  label: "Y Variable",
+  value: "bill_dep"
+})
+
+viewof color_var = Inputs.select(categorical_vars, {
+  label: "Color by",
+  value: "species"
+})
+
+viewof show_trend_species = Inputs.toggle({
+  label: "Show species trends",
+  value: false
+})
+
+viewof show_trend_overall = Inputs.toggle({
+  label: "Show overall trend",
+  value: false
+})
+```
+
+---
+
+And here's a live R chunk using ggplot to plot the penguins data. It automatically reruns when you change the inputs above, and it all happens right in your browser!
+
+```{webr}
+#| echo: false
+#| autorun: true
+
+# See https://github.com/r-wasm/quarto-live/issues/120#issuecomment-3465922265
+with_svg_plot <- function(expr, width = 6, height = 4, bg = "transparent") {
+  tmp <- tempfile(fileext = ".svg")
+
+  svglite::svglite(tmp, width = width, height = height, bg = bg)
+  on.exit({
+    if (grDevices::dev.cur() > 1) grDevices::dev.off()
+  }, add = TRUE)  # Close the device even if there's an error
+
+  result <- eval.parent(substitute(expr))
+
+  # If this is a ggplot plot, draw it with grid::grid.draw() 
+  # (or just print() would work too)
+  if (inherits(result, "ggplot")) {
+    grid::grid.draw(ggplot2::ggplotGrob(result))
+  }
+
+  # Close SVG device since we're done
+  if (grDevices::dev.cur() > 1) grDevices::dev.off()
+
+  # Read the SVG in as bytes to avoid character encoding and line ending issues
+  svg_text <- readChar(tmp, file.info(tmp)$size, useBytes = TRUE)
+
+  # Return as HTML for webr
+  htmltools::HTML(svg_text)
+}
+```
+
+```{webr}
+#| autorun: true
+#| max-lines: 10
+#| fig-width: 6
+#| fig-height: 4
+#| input:
+#|   - species_filter
+#|   - x_var
+#|   - y_var
+#|   - color_var
+#|   - show_trend_species
+#|   - show_trend_overall
+penguins_filtered <- datasets::penguins |>
+  drop_na(sex) |>
+  filter(if (length(species_filter) > 0) species %in% species_filter else TRUE) |>
+  drop_na(all_of(c(x_var, y_var)))
+
+p <- ggplot(penguins_filtered, aes(x = .data[[x_var]], y = .data[[y_var]])) +
+  geom_point(aes(color = .data[[color_var]], shape = .data[[color_var]]), size = 3, alpha = 0.7) +
+  labs(
+    title = "Penguins! 🐧",
+    x = x_var,
+    y = y_var,
+    color = color_var
+  ) +
+  theme_light()
+
+if (show_trend_species) {
+  p <- p + 
+    geom_smooth(
+      aes(color = .data[[color_var]]), 
+      method = "lm", se = FALSE, formula = 'y ~ x'
+    )
+}
+
+if (show_trend_overall) {
+  p <- p + 
+    geom_smooth(
+      color = "#0074D9", 
+      method = "lm", se = FALSE, formula = 'y ~ x'
+    )
+}
+
+# See https://github.com/r-wasm/quarto-live/issues/120#issuecomment-3465922265
+with_svg_plot({ p })
+```
