@@ -5,7 +5,7 @@ toc: true
 
 ## Meet the Palmer Penguins!
 
-![Artwork by \@allison_horst](img/lter_penguins.png){fig-align="center" width="70%"}
+![Artwork by \@allison_horst](img/lter_penguins.png){fig-align="center" width="70%" fig-alt="Illustration of three penguin species against painted background splashes: a Chinstrap penguin on purple (left), a Gentoo penguin on teal (center), and an Adélie penguin on orange (right). Each species is labeled with its name."}
 
 ## Data description
 
@@ -49,4 +49,4 @@ Four of the column names in the older {palmerpenguins} data differ from the buil
 
 Here's what bill length and bill depth refer to:
 
-![Artwork by \@allison_horst](img/culmen_depth.png){fig-align="center" width="70%"}
+![Artwork by \@allison_horst](img/culmen_depth.png){fig-align="center" width="70%" fig-alt="Diagram of a penguin head in profile with dashed lines illustrating two measurements: 'Bill length' spans horizontally from the base to the tip of the bill, and 'Bill depth' spans vertically at the tip. A note explains that in the raw data these are recorded as 'culmen length' and 'culmen depth,' where the culmen is the dorsal ridge atop the bill"}

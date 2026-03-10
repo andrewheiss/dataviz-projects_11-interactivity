@@ -71,11 +71,11 @@ You should be rendering a lot. Follow this general workflow:
 Even with your regular standalone Quarto files, you should be rendering a lot, checking the results to make sure (1) the document looks clean without extra warnings and messages, and (2) your images are sized the way you want them to be.
 :::
 
-![](img/cycle-0.svg){fig-align="center" width="40%"}
+![](img/cycle-0.svg){fig-align="center" width="40%" fig-alt="Circular workflow diagram with three steps connected by gray arrows: 'Edit' (dark red, top), 'Save' (orange, bottom right), and 'Preview' (salmon, bottom left). The arrows indicate a continuous cycle: Edit → Save → Preview → Edit."}
 
 To preview the Quarto document you're working on, render it like normal using the "Render" button at the top of the editor:
 
-![](img/render-button.png){fig-align="center" width="60%" .border}
+![](img/render-button.png){fig-align="center" width="60%" .border fig-alt="Screenshot of the RStudio editor with a .qmd file open. A red box and red arrow highlight the blue "Render" button in the top-right toolbar."}
 
 …or with keyboard shortcuts:
 
@@ -87,11 +87,11 @@ To preview the Quarto document you're working on, render it like normal using th
 
 To preview the whole site, use the "Render Website" button in the Build panel (or run `quarto preview` in the Terminal panel):
 
-![](img/render-website-button.png){fig-align="center" width="60%" .border}
+![](img/render-website-button.png){fig-align="center" width="60%" .border fig-alt="Screenshot of the RStudio Build panel. A red box and red arrow highlight the 'Render Website' button."}
 
 It's probably easiest to not preview the page in Viewer panel in RStudio because it's kind of small. Click on the arrow icon in the top corner of that panel to open the previewed page in your web browser:
 
-![](img/open-in-browser-button.png){fig-align="center" width="60%" .border}
+![](img/open-in-browser-button.png){fig-align="center" width="60%" .border fig-alt="Screenshot of the RStudio Viewer panel showing a rendered Quarto website preview. A red box and red arrow highlight the 'Show in new window' icon button in the toolbar, which opens the preview in a full browser tab. A tooltip reads 'Show in new window.'"}
 
 
 ## Tasks 1 and 2: Interactive plots

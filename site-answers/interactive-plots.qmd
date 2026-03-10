@@ -42,6 +42,7 @@ Use `ggplot()` and `ggplotly()` to recreate this interactive plot:
 #| message: false
 #| warning: false
 #| ref.label: recreation-interactive-plot
+#| opts.label: true
 ```
 
 **Some hints!**
